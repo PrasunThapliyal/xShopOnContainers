@@ -1,0 +1,59 @@
+17 Jan 2020
+-----------
+
+(#) Running a sample app on onxv1338 doesn't work
+	[Ans] Docker host on onxv133* is a very old version and does not support multi-staging, so convert your Dockerfile from multi-staging to single-staging
+
+(#) Running a Sample app on Docker Desktop doesn't work ..
+	$ docker run --name service01 -p 5000:5000 service01
+	It was not possible to find any compatible framework version
+	The framework 'Microsoft.AspNetCore.App', version '3.1.0' was not found.
+	  - No frameworks were found.
+
+	You can resolve the problem by installing the specified framework and/or SDK.
+
+	The specified framework can be found at:
+	  - https://aka.ms/dotnet-core-applaunch?framework=Microsoft.AspNetCore.App&framework_version=3.1.0&arch=x64&rid=debian.10-x64
+
+	[Ans] Not Found, but workaround
+		Changing to 3.0 also doesn't resolve the issue. In my Dockerfile, I'm building using SDK3.1 and Running using Runtime3.1
+		However, if we build the image just on SDK and not use the runtime, it works fine, not sure what's the reason. We could also try using the slim images (FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build and FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-buster-slim AS runtime)
+
+(#) Running a Sample app on Docker Desktop can't bind to ports 5000 or 5001 ? Changing ports doesn't help
+	warn: Microsoft.AspNetCore.Server.Kestrel[0]
+		  Unable to bind to http://localhost:5000 on the IPv6 loopback interface: 'Cannot assign requested address'.
+	warn: Microsoft.AspNetCore.Server.Kestrel[0]
+		  Unable to bind to https://localhost:5001 on the IPv6 loopback interface: 'Cannot assign requested address'.
+	info: Microsoft.Hosting.Lifetime[0]
+		  Now listening on: http://localhost:5000
+	info: Microsoft.Hosting.Lifetime[0]
+		  Now listening on: https://localhost:5001
+
+	[?] My app has not specified port 5001 anywhere .. How come it is trying to listen to 5001 ? Even if I change launchSettings.json to 6000, it still tries to listen to ports 5000 and 5001
+	[Ans] --urls=http://localhost:6001/
+		Even if you run directly from the published folder (instead of creating a container), you get the same result.
+		The thing is that when you use dotnet publish, it doesn't copy the launchSettings.json file, and then (guess) Kestrel tries to use 5000/5001 by default. So in the absence of launchSettings, use the --urls parameter like so
+		$ dotnet Service01.dll --urls=http://localhost:6001/
+
+		And likewise to run on Docker use
+		$ docker run --name service01 --env urls=http://localhost:6001/ -p 6001:6001 service01
+		And specially for docker, localhost:6001 might not work, so use 0.0.0.0:6001
+
+(#) Docker run - unable to bind
+	$ docker run --name service01 --env urls=http://localhost:6001/ -p 6001:6001 service01
+	warn: Microsoft.AspNetCore.Server.Kestrel[0]
+		  Unable to bind to http://localhost:6001 on the IPv6 loopback interface: 'Cannot assign requested address'.
+	[Ans] Instead of localhost, specify 0.0.0.0 in docker run
+		docker run --name service01 --env urls=http://0.0.0.0:6001/ -p 6001:6001 service01
+	
+		Then from another prompt, curl http://localhost:6001/api/Service01
+
+(#) pthapliy@HAW-PTHAPLIY-01 MINGW64 /C/GIT/MyPersonal/xShopOnContainers/Services/Service01/Service01 (master)
+	$ docker exec -it dd8fee4a3dd9 bash
+	the input device is not a TTY.  If you are using mintty, try prefixing the command with 'winpty'
+
+	[Ans] If you are using Git Bash on Windows, you have two choices:
+		1. Use powershell instead of Git Bash
+		2. Use winpty docker exec -it dd8fee4a3dd9 bash
+
+(#) 

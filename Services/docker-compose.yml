@@ -4,3 +4,7 @@ services:
     image: service01
     ports:
      - "6001:80"
+  service02:
+    image: service01
+    ports:
+     - "6002:80"

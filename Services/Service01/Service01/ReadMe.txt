@@ -28,3 +28,10 @@ Key Learnings:
 		either via code (Google - I think in Program.cs) [Not recommended ofcourse]
 		Or via the docker run command
 (#) The host linux machine is not required to have dotnet installed. The docker image is self sufficient as long as it is based off the same OS.
+
+==========================
+08 Jan 2020
+-----------
+
+(#) Updated Dockerfile. Nothing much really, but now the image will be based off runtime rather than the SDK
+

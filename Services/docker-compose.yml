@@ -1,0 +1,6 @@
+version: "3.3"
+services:
+  service01:
+    image: service01
+    ports:
+     - "6001:80"

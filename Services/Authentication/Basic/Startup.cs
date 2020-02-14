@@ -16,6 +16,15 @@ namespace Basic
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddAuthentication("CookieAuth")
+                .AddCookie("CookieAuth", 
+                options => 
+                {
+                    options.Cookie.Name = "Grandmas.Cookie";
+                    options.LoginPath = "/api/Home/Authenticate";
+                });
+
+            services.AddControllers();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -28,12 +37,17 @@ namespace Basic
 
             app.UseRouting();
 
+            app.UseAuthentication(); // Adds MS's AuthenticationMiddleware // Will ask Who you are .. 
+            app.UseAuthorization(); // Adds MS's AuthorizationMiddleware // Will ask Are you allowed
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapGet("/", async context =>
                 {
                     await context.Response.WriteAsync("Hello World!");
                 });
+
+                endpoints.MapDefaultControllerRoute();
             });
         }
     }
